@@ -51,6 +51,7 @@ export default function ManagePage() {
 
       toast.success("Event deleted successfully 🗑️");
     } catch (err) {
+      console.log(err);
       toast.error("Something went wrong ❌");
     } finally {
       setDeletingId(null);
