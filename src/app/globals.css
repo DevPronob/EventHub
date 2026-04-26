@@ -5,6 +5,15 @@
   --foreground: #171717;
 }
 
+body {
+  background-color: #f9fafb; /* same as bg-gray-50 */
+  color: #1f2937; /* same as text-gray-800 */
+   font-family: "Roboto Condensed", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -19,8 +28,4 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+
