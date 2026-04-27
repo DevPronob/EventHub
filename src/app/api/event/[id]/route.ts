@@ -42,18 +42,15 @@ export async function GET(
 }
 
 // DELETE EVENT
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: any) {
   try {
     await connectDB();
 
-    const { id } = await params; // ✅ FIXED HERE
+    const id = params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id) {
       return NextResponse.json(
-        { message: "Invalid ID" },
+        { success: false, message: "No ID" },
         { status: 400 }
       );
     }
@@ -66,7 +63,7 @@ export async function DELETE(
     });
   } catch (err: any) {
     return NextResponse.json(
-      { message: err.message },
+      { success: false, message: err.message || "Server error" },
       { status: 500 }
     );
   }

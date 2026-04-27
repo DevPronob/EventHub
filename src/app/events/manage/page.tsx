@@ -29,33 +29,26 @@ export default function ManagePage() {
 
   // ✅ DELETE FIXED
   const handleDelete = async (id: string) => {
-    const ok = confirm("Are you sure?");
-    if (!ok) return;
+  try {
+    const res = await fetch(`/api/event/${id}`, {
+      method: "DELETE",
+    });
 
-    try {
-      setDeletingId(id);
+    const data = await res.json(); // safe now
 
-      const res = await fetch(`/api/event/${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data?.message || "Delete failed ❌");
-        return;
-      }
-
-      setEvents((prev) => prev.filter((e) => e._id !== id));
-      toast.success("Deleted successfully 🗑️");
-    } catch (err) {
-      console.log(err);
-      toast.error("Something went wrong ❌");
-    } finally {
-      setDeletingId(null);
+    if (!res.ok) {
+      toast.error(data?.message || "Delete failed");
+      return;
     }
-  };
 
+    setEvents((prev) => prev.filter((e) => e._id !== id));
+
+    toast.success("Deleted");
+  } catch (err) {
+    console.log(err);
+    toast.error("Network error");
+  }
+};
   return (
     <div className="max-w-6xl mx-auto py-16 px-4">
       <h1 className="text-3xl font-bold mb-8">Manage Events</h1>
