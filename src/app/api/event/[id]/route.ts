@@ -1,35 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/src/libs/db";
+import * as EventService from "../../../services/event.service";
 
-import mongoose from "mongoose";
-import Event from "@/src/app/models/Event";
 
+// ✅ GET by ID
 export async function GET(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    
-    const { id } = await context.params;
+    const { id } = await context.params; // ✅ MUST await
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid ID" },
-        { status: 400 }
-      );
-    }
-
-    const event = await Event.findById(id);
-
-    if (!event) {
-      return NextResponse.json(
-        { success: false, message: "Not found" },
-        { status: 404 }
-      );
-    }
+    const event = await EventService.getEventById(id);
 
     return NextResponse.json({
       success: true,
@@ -38,27 +23,32 @@ export async function GET(
   } catch (err: any) {
     return NextResponse.json(
       { success: false, message: err.message },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }
 
+
+// ✅ DELETE
 export async function DELETE(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await context.params; // ✅ MUST await
 
-    await Event.findByIdAndDelete(id);
+    await EventService.deleteEvent(id);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Deleted successfully",
+    });
   } catch (err: any) {
     return NextResponse.json(
       { success: false, message: err.message },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }

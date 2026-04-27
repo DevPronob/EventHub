@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { connectDB } from "@/src/libs/db";
-import Event from "../../models/Event";
-
+import * as EventService from "../../../app/services/event.service";
 
 export async function GET() {
   try {
     await connectDB();
 
-    const events = await Event.find().sort({ createdAt: -1 });
+    const events = await EventService.getEvents();
 
     return NextResponse.json({
       success: true,
@@ -26,9 +25,18 @@ export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const body = await req.json();
+    let body;
 
-    const event = await Event.create(body);
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+
+    const event = await EventService.createEvent(body);
 
     return NextResponse.json({
       success: true,
