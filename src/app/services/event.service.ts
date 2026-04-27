@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Event from "../models/Event";
-
+import Event from "../../app/models/Event";
 export const createEvent = async (data: any) => {
   return await Event.create(data);
 };

@@ -1,58 +1,73 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/src/libs/db";
-import * as EventService from "../../../services/event.service";
+import * as EventService from "@/src/app/services/event.service";
+import mongoose from "mongoose";
 
+export const dynamic = "force-dynamic";
 
-// ✅ GET by ID
+// GET SINGLE EVENT
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const { id } = await context.params; // ✅ MUST await
+    const { id } = await params; // ✅ FIXED HERE
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "Invalid ID" },
+        { status: 400 }
+      );
+    }
 
     const event = await EventService.getEventById(id);
 
-    return NextResponse.json({
-      success: true,
-      data: event,
-    });
+    if (!event) {
+      return NextResponse.json(
+        { message: "Not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: event });
   } catch (err: any) {
     return NextResponse.json(
-      { success: false, message: err.message },
-      { status: 400 }
+      { message: err.message },
+      { status: 500 }
     );
   }
 }
 
-
+// DELETE EVENT
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log("DELETE /api/event/[id]");
-
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params; // ✅ FIXED HERE
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: "Invalid ID" },
+        { status: 400 }
+      );
+    }
 
     await EventService.deleteEvent(id);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Deleted successfully",
-      }),
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      message: "Deleted successfully",
+    });
   } catch (err: any) {
-    return new Response(
-      JSON.stringify({ success: false, message: err.message }),
-      { status: 400 }
+    return NextResponse.json(
+      { message: err.message },
+      { status: 500 }
     );
   }
 }
