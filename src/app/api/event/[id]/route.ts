@@ -29,25 +29,29 @@ export async function GET(
 }
 
 
-// ✅ DELETE
 export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log("DELETE /api/event/[id]");
+
     await connectDB();
 
-    const { id } = await context.params; // ✅ MUST await
+    const { id } = await context.params;
 
     await EventService.deleteEvent(id);
 
-    return NextResponse.json({
-      success: true,
-      message: "Deleted successfully",
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Deleted successfully",
+      }),
+      { status: 200 }
+    );
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, message: err.message },
+    return new Response(
+      JSON.stringify({ success: false, message: err.message }),
       { status: 400 }
     );
   }
