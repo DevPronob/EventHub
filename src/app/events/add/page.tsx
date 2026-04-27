@@ -21,223 +21,178 @@ export default function AddEventPage() {
     image: "",
   });
 
+  // ✅ FIXED IMGBB UPLOAD
   const uploadImage = async (file: File) => {
     const formData = new FormData();
-    formData.append("image", file);
 
-    const res = await fetch(
-      "https://api.imgbb.com/1/upload?key=3865938eefff3a14cd02acc91c1d32e1",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+    formData.append("image", file);
+    formData.append("key", "3865938eefff3a14cd02acc91c1d32e1");
+
+    const res = await fetch("https://api.imgbb.com/1/upload", {
+      method: "POST",
+      body: formData,
+    });
 
     const data = await res.json();
-    console.log(data)
+
+    console.log("IMGBB RESPONSE:", data);
+
+    if (!data.success) {
+      throw new Error("Image upload failed");
+    }
+
     return data.data.url;
   };
 
-const handleImage = async (e: any) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  // ✅ IMAGE HANDLER
+  const handleImage = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  setImagePreview(URL.createObjectURL(file));
+    // preview locally
+    setImagePreview(URL.createObjectURL(file));
 
-  const url = await uploadImage(file);
+    try {
+      const url = await uploadImage(file);
 
-  console.log("IMAGE URL:", url);
+      console.log("UPLOAD URL:", url);
 
-  setForm((prev: any) => ({
-    ...prev,
-    image: url,
-  }));
-  console.log(file)
-};
+      setForm((prev: any) => ({
+        ...prev,
+        image: url,
+      }));
+    } catch (err) {
+      console.error("Image upload error:", err);
+    }
+  };
 
+  // ✅ SUBMIT HANDLER
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
 
-    await fetch("/api/event", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("/api/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    setLoading(false);
-    router.push("/events");
+      const data = await res.json();
+      console.log("EVENT CREATED:", data);
+
+      router.push("/events");
+    } catch (error) {
+      console.error("Submit error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="max-w-5xl mx-auto py-16 px-4">
-
-      
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">
-          Create Event
-        </h1>
-
+        <h1 className="text-3xl font-bold">Create Event</h1>
         <p className="text-gray-500 mt-1">
           Fill all required details to publish your event
         </p>
       </div>
 
-     
       <form
         onSubmit={handleSubmit}
         className="bg-white border rounded-2xl shadow-sm p-6"
       >
-
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          
+          {/* LEFT */}
           <div className="space-y-4">
+            <input
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="Event Title"
+              onChange={(e) =>
+                setForm({ ...form, title: e.target.value })
+              }
+            />
 
-            
-            <div>
-              <label className="text-sm font-medium">
-                Event Title
-              </label>
-              <input
-                className="w-full border rounded-lg px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Enter event title"
-                onChange={(e) =>
-                  setForm({ ...form, title: e.target.value })
-                }
-              />
-            </div>
+            <input
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="Category"
+              onChange={(e) =>
+                setForm({ ...form, category: e.target.value })
+              }
+            />
 
-            
-            <div>
-              <label className="text-sm font-medium">
-                Category
-              </label>
-              <input
-                className="w-full border rounded-lg px-4 py-2 mt-1"
-                placeholder="Tech / Music / Business"
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value })
-                }
-              />
-            </div>
+            <input
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="Location"
+              onChange={(e) =>
+                setForm({ ...form, location: e.target.value })
+              }
+            />
 
-           
-            <div>
-              <label className="text-sm font-medium">
-                Location
-              </label>
-              <input
-                className="w-full border rounded-lg px-4 py-2 mt-1"
-                placeholder="Dhaka, Bangladesh"
-                onChange={(e) =>
-                  setForm({ ...form, location: e.target.value })
-                }
-              />
-            </div>
-
-           
-            <div>
-              <label className="text-sm font-medium">
-                Date
-              </label>
-              <input
-                type="date"
-                className="w-full border rounded-lg px-4 py-2 mt-1"
-                onChange={(e) =>
-                  setForm({ ...form, date: e.target.value })
-                }
-              />
-            </div>
-
+            <input
+              type="date"
+              className="w-full border rounded-lg px-4 py-2"
+              onChange={(e) =>
+                setForm({ ...form, date: e.target.value })
+              }
+            />
           </div>
 
-          
+          {/* RIGHT */}
           <div className="space-y-4">
+            <input
+              type="number"
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="Price"
+              onChange={(e) =>
+                setForm({ ...form, price: e.target.value })
+              }
+            />
 
-            
-            <div>
-              <label className="text-sm font-medium">
-                Price ($)
-              </label>
-              <input
-                type="number"
-                className="w-full border rounded-lg px-4 py-2 mt-1"
-                placeholder="0"
-                onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
-                }
-              />
-            </div>
+            <textarea
+              className="w-full border rounded-lg px-4 py-2"
+              rows={3}
+              placeholder="Short Description"
+              onChange={(e) =>
+                setForm({ ...form, shortDesc: e.target.value })
+              }
+            />
 
-           
-            <div>
-              <label className="text-sm font-medium">
-                Short Description
-              </label>
-              <textarea
-                className="w-full border rounded-lg px-4 py-2 mt-1"
-                rows={3}
-                placeholder="Short summary..."
-                onChange={(e) =>
-                  setForm({ ...form, shortDesc: e.target.value })
-                }
-              />
-            </div>
-
-            
-            <div>
-              <label className="text-sm font-medium">
-                Full Description
-              </label>
-              <textarea
-                className="w-full border rounded-lg px-4 py-2 mt-1"
-                rows={4}
-                placeholder="Full event details..."
-                onChange={(e) =>
-                  setForm({ ...form, fullDesc: e.target.value })
-                }
-              />
-            </div>
-
+            <textarea
+              className="w-full border rounded-lg px-4 py-2"
+              rows={4}
+              placeholder="Full Description"
+              onChange={(e) =>
+                setForm({ ...form, fullDesc: e.target.value })
+              }
+            />
           </div>
-
         </div>
 
-       
+        {/* IMAGE */}
         <div className="mt-6">
-
-          <label className="text-sm font-medium">
-            Upload Image
-          </label>
-
           <input
             type="file"
-            className="w-full border rounded-lg px-4 py-2 mt-1"
+            className="w-full border rounded-lg px-4 py-2"
             onChange={handleImage}
           />
 
-         
           {imagePreview && (
             <img
               src={imagePreview}
               className="h-48 w-full object-cover rounded-xl mt-4"
             />
           )}
-
         </div>
 
-        
+        {/* BUTTON */}
         <button
           disabled={loading}
-          className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-medium transition"
+          className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl"
         >
           {loading ? "Creating Event..." : "Create Event"}
         </button>
-
       </form>
-
     </div>
   );
 }
