@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = "mongodb+srv://pronobroy3601_db_user:vexh5xdjkqkoYZPr@cluster0.mpex8wj.mongodb.net/?appName=Cluster0"
+const MONGODB_URI =process.env.MONGODB_URI; 
 
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI not found in .env");
