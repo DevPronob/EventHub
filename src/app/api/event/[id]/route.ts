@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/src/libs/db";
 import * as EventService from "@/src/app/services/event.service";
@@ -14,11 +13,11 @@ export async function GET(
   try {
     await connectDB();
 
-    const { id } = await params; // ✅ FIXED HERE
+    const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { message: "Invalid ID" },
+        { success: false, message: "Invalid ID" },
         { status: 400 }
       );
     }
@@ -27,30 +26,36 @@ export async function GET(
 
     if (!event) {
       return NextResponse.json(
-        { message: "Not found" },
+        { success: false, message: "Not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: event });
+    return NextResponse.json({
+      success: true,
+      data: event,
+    });
   } catch (err: any) {
     return NextResponse.json(
-      { message: err.message },
+      { success: false, message: err.message },
       { status: 500 }
     );
   }
 }
 
 // DELETE EVENT
-export async function DELETE(req: NextRequest, { params }: any) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
 
-    const id = params.id;
+    const { id } = await params;
 
-    if (!id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, message: "No ID" },
+        { success: false, message: "Invalid ID" },
         { status: 400 }
       );
     }
@@ -63,7 +68,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     });
   } catch (err: any) {
     return NextResponse.json(
-      { success: false, message: err.message || "Server error" },
+      { success: false, message: err.message },
       { status: 500 }
     );
   }
