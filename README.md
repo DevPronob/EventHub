@@ -82,9 +82,7 @@ npm run dev
 
 ---
 
-## 🚀 Live Demo
 
-Deployed on Vercel (add your link here)
 
 ---
 
